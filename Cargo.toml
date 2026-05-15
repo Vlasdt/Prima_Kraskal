@@ -1,0 +1,8 @@
+[package]
+name = "Prima_Kraskal_4"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+plotters = "0.3.7"
+termgraph = "0.4.0"
