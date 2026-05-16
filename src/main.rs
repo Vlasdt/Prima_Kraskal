@@ -108,6 +108,22 @@ impl<const N: usize> Graph<N> {
         tmp_graph
     }
 
+    ///   function Kruskal(Graph G):
+    ///     T = пустой граф
+    ///     sort(E)  // сортируем рёбра по весу
+    ///     
+    ///     for each edge e in E (в порядке возрастания веса):
+    ///       добавить e в T
+    ///       if T содержит цикл:
+    ///         удалить e из T
+    ///     
+    ///     return T
+    ///
+    /// Временная сложность: O(M log M) на сортировку + O(M * (N + M)) на проверки циклов
+    ///   (текущая реализация: O(M log M + M * (N + M)) ≈ O(M^2) в худшем случае)
+    ///   Оптимальная реализация с DSU (системой непересекающихся множеств): O(M log M)
+    ///
+    /// Пространственная сл
     fn prima_kraskal(&mut self) -> Graph<N> {
         let mut tmp_graph = Graph::<N>::new(self.V);
         let mut e_copy_sort: Vec<(usize, usize, u64)> = self.E.clone();
