@@ -186,6 +186,20 @@ impl<const N: usize> Graph<N> {
         root.present()?;
         Ok(())
     }
+
+    fn most_ostov_tree(&mut self) -> Graph<N> {
+        let mut tmp_graph = Graph::<N>::new(self.V);
+        let mut e_copy_sort: Vec<(usize, usize, u64)> = self.E.clone();
+        e_copy_sort.sort_by_key(|&(_, _, w)| w);
+        e_copy_sort.reverse();
+        for a in e_copy_sort {
+            tmp_graph.E.push(a);
+            if tmp_graph.is_cycle() {
+                tmp_graph.E.pop();
+            }
+        }
+        tmp_graph
+    }
 }
 
 fn main() {
@@ -216,4 +230,8 @@ fn main() {
 
     println!("prima_sum: {}", prim.get_sum());
     println!("prima_kraskal_sum:{}", min_ostov.get_sum());
+
+    let mut most_ost = graph.most_ostov_tree();
+    most_ost.draw_graph("most_ost.png");
+    println!("most_ost_sum:{}", most_ost.get_sum());
 }
