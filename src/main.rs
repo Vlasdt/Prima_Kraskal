@@ -10,6 +10,13 @@ impl<const N: usize> Graph<N> {
     fn new(V: [usize; N]) -> Self {
         Graph { V, E: Vec::new() }
     }
+    fn get_sum(&mut self) -> u64 {
+        let mut sum: u64 = 0;
+        for (_, _, w) in &self.E {
+            sum += w;
+        }
+        sum
+    }
 
     fn add_edge(&mut self, u: usize, v: usize, w: u64) {
         self.E.push((u, v, w));
@@ -60,6 +67,53 @@ impl<const N: usize> Graph<N> {
             }
         }
         false
+    }
+
+    fn prima(&mut self) -> Graph<N> {
+        let mut tmp_graph = Graph::<N>::new(self.V);
+        let mut is_in_v_i = [false; N];
+        let mut e_copy_sort: Vec<(usize, usize, u64)> = self.E.clone();
+        e_copy_sort.sort_by_key(|&(_, _, w)| w);
+
+        // Добавляем первую вершину (с которой начнём)
+        is_in_v_i[0] = true;
+        let mut edges_count = 0;
+
+        while edges_count < N - 1 {
+            // Ищем минимальное ребро, инцидентное дереву
+            let mut min_edge = None;
+            let mut min_weight = u64::MAX;
+
+            for &(v_start, v_end, weight) in &e_copy_sort {
+                let start_in = is_in_v_i[v_start];
+                let end_in = is_in_v_i[v_end];
+
+                // Ровно один конец в дереве
+                if (start_in ^ end_in) && (weight < min_weight) {
+                    min_weight = weight;
+                    min_edge = Some((v_start, v_end, weight));
+                }
+            }
+
+            // Добавляем найденное ребро
+            if let Some((v_start, v_end, weight)) = min_edge {
+                tmp_graph.add_edge(v_start, v_end, weight);
+
+                // Отмечаем новую вершину
+                if !is_in_v_i[v_start] {
+                    is_in_v_i[v_start] = true;
+                }
+                if !is_in_v_i[v_end] {
+                    is_in_v_i[v_end] = true;
+                }
+
+                edges_count += 1;
+            } else {
+                break; // Граф несвязный
+            }
+        }
+
+        tmp_graph
     }
 
     fn prima_kraskal(&mut self) -> Graph<N> {
@@ -155,7 +209,11 @@ fn main() {
     graph.draw_graph("graph.png");
 
     let mut min_ostov = graph.prima_kraskal();
-    min_ostov.draw_graph("min_ostov.png");
+    min_ostov.draw_graph("prima_kraskal.png");
 
-    println!("{:?}", graph.is_cycle());
+    let mut prim = graph.prima();
+    prim.draw_graph("prima.png");
+
+    println!("prima_sum: {}", prim.get_sum());
+    println!("prima_kraskal_sum:{}", min_ostov.get_sum());
 }
