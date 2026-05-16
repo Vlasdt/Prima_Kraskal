@@ -2,8 +2,8 @@ use plotters::prelude::*;
 
 #[derive(Debug)]
 struct Graph<const N: usize> {
-    V: [usize; N],               // массив вершин (фиксированный)
-    E: Vec<(usize, usize, u64)>, // рёбра (u, v, вес)
+    V: [usize; N],
+    E: Vec<(usize, usize, u64)>,
 }
 
 impl<const N: usize> Graph<N> {
@@ -23,7 +23,7 @@ impl<const N: usize> Graph<N> {
     }
 
     fn adjacency_list(&self) -> Vec<Vec<(usize, u64)>> {
-        let mut adj = vec![vec![]; N]; // инициализируем N пустых векторов
+        let mut adj = vec![vec![]; N];
 
         for &(u, v, w) in &self.E {
             adj[u].push((v, w));
@@ -33,7 +33,7 @@ impl<const N: usize> Graph<N> {
     }
 
     fn is_cycle(&self) -> bool {
-        let adj = self.adjacency_list(); // вычисляем один раз
+        let adj = self.adjacency_list();
         let mut visited = vec![false; N];
 
         for v in 0..N {
@@ -57,12 +57,10 @@ impl<const N: usize> Graph<N> {
 
         for &(neighbor, _weight) in &adj[v] {
             if !visited[neighbor] {
-                // Рекурсивно обходим соседа, текущая вершина становится родителем
                 if self.dfs_cycle(neighbor, v, visited, adj) {
                     return true;
                 }
             } else if neighbor != parent {
-                // Сосед уже посещён и это не родитель -> цикл
                 return true;
             }
         }
@@ -75,12 +73,10 @@ impl<const N: usize> Graph<N> {
         let mut e_copy_sort: Vec<(usize, usize, u64)> = self.E.clone();
         e_copy_sort.sort_by_key(|&(_, _, w)| w);
 
-        // Добавляем первую вершину (с которой начнём)
         is_in_v_i[0] = true;
         let mut edges_count = 0;
 
         while edges_count < N - 1 {
-            // Ищем минимальное ребро, инцидентное дереву
             let mut min_edge = None;
             let mut min_weight = u64::MAX;
 
@@ -88,14 +84,12 @@ impl<const N: usize> Graph<N> {
                 let start_in = is_in_v_i[v_start];
                 let end_in = is_in_v_i[v_end];
 
-                // Ровно один конец в дереве
                 if (start_in ^ end_in) && (weight < min_weight) {
                     min_weight = weight;
                     min_edge = Some((v_start, v_end, weight));
                 }
             }
 
-            // Добавляем найденное ребро
             if let Some((v_start, v_end, weight)) = min_edge {
                 tmp_graph.add_edge(v_start, v_end, weight);
 
@@ -108,8 +102,6 @@ impl<const N: usize> Graph<N> {
                 }
 
                 edges_count += 1;
-            } else {
-                break; // Граф несвязный
             }
         }
 
@@ -150,20 +142,16 @@ impl<const N: usize> Graph<N> {
             .margin(20)
             .build_cartesian_2d(0f64..size, 0f64..size)?;
 
-        // Рисуем рёбра с подписями весов
         for (i, neighbors) in adj_list.iter().enumerate() {
             for &(j, weight) in neighbors {
                 if i < j {
-                    // Рисуем линию
                     chart.draw_series(LineSeries::new(vec![positions[i], positions[j]], &BLACK))?;
 
-                    // Вычисляем середину ребра
                     let (x1, y1) = positions[i];
                     let (x2, y2) = positions[j];
                     let mid_x = (x1 + x2) / 2.0;
                     let mid_y = (y1 + y2) / 2.0;
 
-                    // Рисуем вес ребра
                     chart.draw_series(std::iter::once(Text::new(
                         format!("{}", weight),
                         (mid_x, mid_y),
@@ -173,7 +161,6 @@ impl<const N: usize> Graph<N> {
             }
         }
 
-        // Рисуем вершины и подписи
         for (i, &(x, y)) in positions.iter().enumerate() {
             chart.draw_series(std::iter::once(Circle::new((x, y), 10, RED.filled())))?;
             chart.draw_series(std::iter::once(Text::new(
@@ -203,23 +190,38 @@ impl<const N: usize> Graph<N> {
 }
 
 fn main() {
-    let vertices = [0, 1, 2, 3, 4];
-    let mut graph = Graph::<5>::new(vertices);
+    let vertices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let mut graph = Graph::<11>::new(vertices);
 
-    // Рёбра: u, v, вес
-    graph.add_edge(0, 1, 2);
-    graph.add_edge(0, 2, 3);
-    graph.add_edge(0, 3, 1);
-    graph.add_edge(0, 4, 4);
+    // Рёбра: u, v, вес (v1=0, v2=1, v3=2, v4=3, v5=4, v6=5, v7=6, v8=7, v9=8, v10=9, v11=10)
+    graph.add_edge(0, 1, 5); // v1-v2
+    graph.add_edge(0, 2, 3); // v1-v3
+    graph.add_edge(0, 3, 10); // v1-v4
 
-    graph.add_edge(1, 2, 5);
-    graph.add_edge(1, 3, 2);
-    graph.add_edge(1, 4, 6);
+    graph.add_edge(1, 2, 10); // v2-v3
+    graph.add_edge(1, 10, 5); // v2-v11
 
-    graph.add_edge(2, 3, 7);
-    graph.add_edge(2, 4, 2);
+    graph.add_edge(2, 5, 8); // v3-v6
+    graph.add_edge(2, 6, 10); // v3-v7
+    graph.add_edge(2, 7, 2); // v3-v8
 
-    graph.add_edge(3, 4, 3);
+    graph.add_edge(3, 4, 1); // v4-v5
+    graph.add_edge(3, 5, 1); // v4-v6
+
+    graph.add_edge(4, 5, 1); // v5-v6
+    graph.add_edge(4, 6, 2); // v5-v7
+
+    graph.add_edge(5, 6, 10); // v6-v7
+
+    graph.add_edge(6, 8, 1); // v7-v9
+    graph.add_edge(6, 7, 2); // v7-v8
+
+    graph.add_edge(7, 8, 3); // v8-v9
+    graph.add_edge(7, 10, 7); // v8-v11
+    graph.add_edge(7, 9, 1); // v8-v10
+
+    graph.add_edge(8, 9, 1); // v9-v10
+    graph.add_edge(9, 10, 6); // v10-v11
     graph.draw_graph("graph.png");
 
     let mut min_ostov = graph.prima_kraskal();
