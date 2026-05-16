@@ -67,6 +67,20 @@ impl<const N: usize> Graph<N> {
         false
     }
 
+    ///   function Prim(Graph G):
+    ///     T = пустое дерево
+    ///     inTree = [false] * N
+    ///     inTree[0] = true  // начинаем с произвольной вершины
+    ///     
+    ///     while |T.E| < N-1:
+    ///       e = ребро минимального веса, соединяющее inTree и !inTree
+    ///       добавить e в T
+    ///       отметить новую вершину в inTree
+    ///     
+    ///     return T
+    ///
+    /// Временная сложность: O(M log M) из-за сортировки + O(N * M) для поиска рёбер
+    /// Пространственная сложность: O(N + M)
     fn prima(&mut self) -> Graph<N> {
         let mut tmp_graph = Graph::<N>::new(self.V);
         let mut is_in_v_i = [false; N];
@@ -123,7 +137,7 @@ impl<const N: usize> Graph<N> {
     ///   (текущая реализация: O(M log M + M * (N + M)) ≈ O(M^2) в худшем случае)
     ///   Оптимальная реализация с DSU (системой непересекающихся множеств): O(M log M)
     ///
-    /// Пространственная сл
+    /// Пространственная O(N+M)
     fn prima_kraskal(&mut self) -> Graph<N> {
         let mut tmp_graph = Graph::<N>::new(self.V);
         let mut e_copy_sort: Vec<(usize, usize, u64)> = self.E.clone();
