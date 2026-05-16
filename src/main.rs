@@ -194,7 +194,7 @@ impl<const N: usize> Graph<N> {
         for (i, &(x, y)) in positions.iter().enumerate() {
             chart.draw_series(std::iter::once(Circle::new((x, y), 10, RED.filled())))?;
             chart.draw_series(std::iter::once(Text::new(
-                i.to_string(),
+                (i + 1).to_string(),
                 (x - 5.0, y + 3.0),
                 ("sans-serif", 15).into_font().color(&BLACK),
             )))?;
